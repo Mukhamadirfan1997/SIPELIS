@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login — SiPeLis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --blue-900: #0f2a5e;
+        --blue-700: #1a4096;
+        --blue-500: #2563eb;
+        --blue-400: #3b82f6;
+        --blue-100: #dbeafe;
+        --blue-50: #eff6ff;
+        --slate-700: #334155;
+        --slate-500: #64748b;
+        --slate-300: #cbd5e1;
+        --slate-100: #f1f5f9;
+        --white: #ffffff;
+        --accent: #06b6d4;
+        --success: #10b981;
+        --danger: #ef4444;
+      }
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        min-height: 100vh;
+        background: linear-gradient(
+          135deg,
+          var(--blue-900) 0%,
+          #1e3a8a 40%,
+          #1d4ed8 100%
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+      }
+      /* Decorative blobs */
+      body::before {
+        content: "";
+        position: absolute;
+        width: 600px;
+        height: 600px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(37, 99, 235, 0.25) 0%,
+          transparent 70%
+        );
+        top: -200px;
+        right: -200px;
+      }
+      body::after {
+        content: "";
+        position: absolute;
+        width: 400px;
+        height: 400px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(6, 182, 212, 0.2) 0%,
+          transparent 70%
+        );
+        bottom: -100px;
+        left: -100px;
+      }
+      .grid-bg {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+      }
+      .login-card {
+        position: relative;
+        z-index: 10;
+        background: rgba(255, 255, 255, 0.97);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        box-shadow:
+          0 32px 80px rgba(0, 0, 0, 0.35),
+          0 0 0 1px rgba(255, 255, 255, 0.1);
+        padding: 48px 44px;
+        width: 100%;
+        max-width: 440px;
+        animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      }
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(40px) scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+      .brand {
+        text-align: center;
+        margin-bottom: 36px;
+      }
+      .brand-icon {
+        width: 68px;
+        height: 68px;
+        background: linear-gradient(135deg, var(--blue-700), var(--blue-500));
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        box-shadow: 0 12px 32px rgba(37, 99, 235, 0.35);
+      }
+      .brand-icon i {
+        font-size: 28px;
+        color: white;
+      }
+      .brand h1 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--blue-900);
+        letter-spacing: -0.5px;
+      }
+      .brand p {
+        font-size: 0.875rem;
+        color: var(--slate-500);
+        margin-top: 4px;
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--slate-700);
+        margin-bottom: 8px;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+      }
+      .input-wrap {
+        position: relative;
+      }
+      .input-wrap i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--slate-300);
+        font-size: 0.9rem;
+        transition: color 0.2s;
+      }
+      input[type="text"],
+      input[type="password"] {
+        width: 100%;
+        padding: 13px 14px 13px 42px;
+        border: 2px solid var(--slate-300);
+        border-radius: 12px;
+        font-family: inherit;
+        font-size: 0.95rem;
+        color: var(--slate-700);
+        background: var(--white);
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+        outline: none;
+      }
+      input:focus {
+        border-color: var(--blue-500);
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+      }
+      input:focus + i,
+      .input-wrap:focus-within i {
+        color: var(--blue-500);
+      }
+      .eye-toggle {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: var(--slate-300);
+        font-size: 0.9rem;
+        transition: color 0.2s;
+        left: auto;
+      }
+      .eye-toggle:hover {
+        color: var(--slate-500);
+      }
+      .btn-login {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, var(--blue-700), var(--blue-500));
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-family: inherit;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        letter-spacing: 0.3px;
+        transition:
+          transform 0.15s,
+          box-shadow 0.15s;
+        box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
+        margin-top: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .btn-login:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 32px rgba(37, 99, 235, 0.45);
+      }
+      .btn-login:active {
+        transform: translateY(0);
+      }
+      .btn-login .spinner {
+        display: none;
+      }
+      .btn-login.loading .spinner {
+        display: inline-block;
+      }
+      .btn-login.loading .btn-text {
+        display: none;
+      }
+      .spinner {
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .alert {
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-size: 0.875rem;
+        margin-bottom: 20px;
+        display: none;
+        align-items: center;
+        gap: 8px;
+      }
+      .alert-error {
+        background: #fef2f2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+        display: flex;
+      }
+      .footer-note {
+        text-align: center;
+        margin-top: 28px;
+        font-size: 0.78rem;
+        color: var(--slate-500);
+      }
+      .footer-note span {
+        font-weight: 700;
+        color: var(--blue-700);
+      }
+      /* Demo credentials box */
+      .demo-box {
+        background: var(--blue-50);
+        border: 1px dashed var(--blue-400);
+        border-radius: 10px;
+        padding: 10px 14px;
+        margin-bottom: 20px;
+        font-size: 0.78rem;
+        color: var(--slate-500);
+      }
+      .demo-box strong {
+        color: var(--blue-700);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="grid-bg"></div>
+    <div class="login-card">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="fas fa-bolt"></i>
+        </div>
+        <h1>SiPeLis</h1>
+        <p>Sistem Pencatatan Listrik & Internet Sekolah</p>
+      </div>
+
+      <div class="demo-box">
+        <strong>Demo Akun:</strong> Username <code>admin</code> / Password
+        <code>admin123</code><br />
+        <small
+          >Ganti Google Script URL di <code>app.js</code> untuk data
+          real.</small
+        >
+      </div>
+
+      <div class="alert alert-error" id="alertError">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="alertMsg">Username atau password salah.</span>
+      </div>
+
+      <div class="form-group">
+        <label for="username">Username</label>
+        <div class="input-wrap">
+          <input
+            type="text"
+            id="username"
+            placeholder="Masukkan username..."
+            autocomplete="username"
+          />
+          <i class="fas fa-user"></i>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <input
+            type="password"
+            id="password"
+            placeholder="Masukkan password..."
+            autocomplete="current-password"
+          />
+          <i class="fas fa-lock"></i>
+          <i
+            class="fas fa-eye eye-toggle"
+            id="eyeToggle"
+            onclick="togglePwd()"
+          ></i>
+        </div>
+      </div>
+
+      <button class="btn-login" id="btnLogin" onclick="doLogin()">
+        <div class="spinner"></div>
+        <span class="btn-text"><i class="fas fa-sign-in-alt"></i> Masuk</span>
+      </button>
+
+      <p class="footer-note">
+        SiPeLis v1.0 &nbsp;|&nbsp; <span>IrfanDev97</span>
+      </p>
+    </div>
+
+    <script>
+      // Check if already logged in
+      if (sessionStorage.getItem("siPelisUser")) {
+        window.location.href = "dashboard.html";
+      }
+
+      function togglePwd() {
+        const p = document.getElementById("password");
+        const e = document.getElementById("eyeToggle");
+        if (p.type === "password") {
+          p.type = "text";
+          e.className = "fas fa-eye-slash eye-toggle";
+        } else {
+          p.type = "password";
+          e.className = "fas fa-eye eye-toggle";
+        }
+      }
+
+      async function doLogin() {
+        const user = document.getElementById("username").value.trim();
+        const pass = document.getElementById("password").value.trim();
+        const btn = document.getElementById("btnLogin");
+        const alert = document.getElementById("alertError");
+
+        if (!user || !pass) {
+          showAlert("Username dan password tidak boleh kosong.");
+          return;
+        }
+
+        btn.classList.add("loading");
+        alert.style.display = "none";
+
+        try {
+          // Try Google Sheets auth first
+          const DEFAULT_URL =
+            "https://script.google.com/macros/s/AKfycbzVaXNpbWCur65u8Fbx3bP2KmeFt2INZ4AFBWDThcK39zfzT7YeKhoqz_-uSEcvCQQ/exec";
+          const GAS_URL = localStorage.getItem("gasUrl") || DEFAULT_URL;
+          let authenticated = false;
+
+          if (GAS_URL) {
+            const res = await fetch(
+              `${GAS_URL}?action=login&user=${encodeURIComponent(user)}&pass=${encodeURIComponent(pass)}`,
+            );
+            const json = await res.json();
+            authenticated = json.success === true;
+          } else {
+            // Fallback: demo credentials
+            authenticated = user === "admin" && pass === "admin123";
+          }
+
+          if (authenticated) {
+            sessionStorage.setItem("siPelisUser", user);
+            window.location.href = "dashboard.html";
+          } else {
+            showAlert("Username atau password salah.");
+          }
+        } catch (e) {
+          // Fallback to demo mode
+          if (user === "admin" && pass === "admin123") {
+            sessionStorage.setItem("siPelisUser", user);
+            window.location.href = "dashboard.html";
+          } else {
+            showAlert("Login gagal. Cek koneksi atau kredensial Anda.");
+          }
+        } finally {
+          btn.classList.remove("loading");
+        }
+      }
+
+      function showAlert(msg) {
+        document.getElementById("alertMsg").textContent = msg;
+        document.getElementById("alertError").style.display = "flex";
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") doLogin();
+      });
+    </script>
+  </body>
+</html>
