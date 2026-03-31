@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Laporan & Export — SiPeLis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+<div class="section-title">📥 Laporan & Export</div>
+<p class="section-sub">Unduh laporan dalam format Excel atau PDF sesuai format BOS</p>
+
+<!-- Filter -->
+<div class="card gap-24">
+  <div class="card-header">
+    <span class="card-title"><i class="fas fa-filter" style="color:var(--blue-500);margin-right:8px;"></i>Filter Laporan</span>
+  </div>
+  <div class="card-body">
+    <div class="form-grid form-grid-3">
+      <div class="form-group">
+        <label>Jenis Data</label>
+        <select id="filterJenis" class="form-control" onchange="loadPreview()">
+          <option value="semua">Semua (Listrik + Internet)</option>
+          <option value="listrik">Listrik Saja</option>
+          <option value="internet">Internet Saja</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Bulan Awal</label>
+        <select id="filterBulanAwal" class="form-control" onchange="loadPreview()">
+          <option value="">Semua</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Bulan Akhir</label>
+        <select id="filterBulanAkhir" class="form-control" onchange="loadPreview()">
+          <option value="">Semua</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:6px;flex-wrap:wrap;">
+      <button class="btn btn-success" onclick="exportExcelFull()">
+        <i class="fas fa-file-excel"></i> Download Excel (.xlsx)
+      </button>
+      <button class="btn btn-danger" onclick="exportPdfFull()">
+        <i class="fas fa-file-pdf"></i> Download PDF
+      </button>
+      <button class="btn btn-outline" onclick="window.print()">
+        <i class="fas fa-print"></i> Cetak
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Summary Stats -->
+<div class="grid-4 gap-24" id="summaryStats" style="margin-top:20px;">
+  <div class="stat-card">
+    <div>
+      <div class="stat-label">Total SPJ Listrik</div>
+      <div class="stat-value" id="s_listrikSpj">—</div>
+    </div>
+    <div class="stat-icon blue"><i class="fas fa-bolt"></i></div>
+  </div>
+  <div class="stat-card">
+    <div>
+      <div class="stat-label">Total SPJ Internet</div>
+      <div class="stat-value" id="s_internetSpj">—</div>
+    </div>
+    <div class="stat-icon cyan"><i class="fas fa-wifi"></i></div>
+  </div>
+  <div class="stat-card">
+    <div>
+      <div class="stat-label">Total Realisasi</div>
+      <div class="stat-value" id="s_realisasi">—</div>
+    </div>
+    <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+  </div>
+  <div class="stat-card">
+    <div>
+      <div class="stat-label">Total Selisih</div>
+      <div class="stat-value" id="s_selisih">—</div>
+    </div>
+    <div class="stat-icon amber"><i class="fas fa-scale-balanced"></i></div>
+  </div>
+</div>
+
+<!-- Preview Printable Report -->
+<div class="card" style="margin-top:20px;" id="reportPreviewCard">
+  <div class="card-header">
+    <span class="card-title"><i class="fas fa-eye" style="color:var(--slate-500);margin-right:8px;"></i>Preview Laporan</span>
+    <span id="previewMeta" style="font-size:0.78rem;color:var(--slate-400);"></span>
+  </div>
+  <div class="card-body" id="reportPreview" style="padding:0;">
+    <div style="padding:40px;text-align:center;color:var(--slate-400);">
+      <i class="fas fa-spinner fa-spin" style="font-size:2rem;margin-bottom:12px;display:block;"></i>
+      Memuat preview…
+    </div>
+  </div>
+</div>
+
+<!-- Printable Area (hidden, used for PDF) -->
+<div id="printArea" style="display:none;">
+  <div id="printContent"></div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loader"></div>
+  <div class="loader-text" id="loadingText">Menyiapkan laporan…</div>
+</div>
+
+<style>
+  @media print {
+    .sidebar, .topbar, .card-header button, .btn, #filterJenis,
+    #filterBulanAwal, #filterBulanAkhir, #summaryStats { display:none!important; }
+    .main-area { margin-left:0!important; }
+    .card { box-shadow:none!important; border:none!important; }
+    #reportPreviewCard .card-header { display:none!important; }
+  }
+  .report-table { width:100%; border-collapse:collapse; font-size:0.82rem; }
+  .report-table th, .report-table td {
+    border:1px solid #cbd5e1; padding:9px 12px; text-align:left;
+  }
+  .report-table thead th {
+    background:#1e40af; color:white; font-weight:700; font-size:0.75rem;
+    text-transform:uppercase; letter-spacing:0.3px;
+  }
+  .report-table tbody tr:nth-child(even) { background:#f8fafc; }
+  .report-table tfoot td { background:#f1f5f9; font-weight:700; }
+  .report-header { text-align:center; margin-bottom:24px; }
+  .report-header h2 { font-size:1.1rem; font-weight:800; color:#0f2a5e; }
+  .report-header p { font-size:0.8rem; color:#64748b; margin-top:2px; }
+  .report-section-title {
+    font-size:0.9rem; font-weight:700; color:#1e40af;
+    padding:10px 16px; background:#eff6ff;
+    border-left:4px solid #2563eb; margin:16px 0 10px;
+  }
+</style>
+
+<script src="app.js"></script>
+<script src="layout.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+  requireLogin();
+  injectLayout('Laporan & Export');
+
+  let dataListrik = [], dataInternet = [], profilData = {};
+
+  // Populate month dropdowns
+  ['filterBulanAwal','filterBulanAkhir'].forEach(id => {
+    const sel = document.getElementById(id);
+    BULAN_ORDER.forEach(b => {
+      const o = document.createElement('option'); o.value = b; o.textContent = b;
+      sel.appendChild(o);
+    });
+  });
+
+  async function init() {
+    try {
+      [dataListrik, dataInternet] = await Promise.all([gasGet('listrik'), gasGet('internet')]);
+      const profArr = await gasGet('profil');
+      profilData = (profArr && profArr.length) ? profArr[0] : JSON.parse(localStorage.getItem('siPelisProfil') || '{}');
+      loadPreview();
+    } catch(e) { toast('Gagal memuat data: ' + e.message, 'error'); }
+  }
+
+  function getFilteredData() {
+    const jenis = document.getElementById('filterJenis').value;
+    const bulanAwal  = document.getElementById('filterBulanAwal').value;
+    const bulanAkhir = document.getElementById('filterBulanAkhir').value;
+    const ia = bulanAwal  ? BULAN_ORDER.indexOf(bulanAwal)  : 0;
+    const ib = bulanAkhir ? BULAN_ORDER.indexOf(bulanAkhir) : 11;
+
+    const filterBulan = r => {
+      const idx = BULAN_ORDER.indexOf(r.bulan);
+      return idx >= ia && idx <= ib;
+    };
+
+    let l = jenis !== 'internet' ? dataListrik.filter(filterBulan) : [];
+    let i = jenis !== 'listrik'  ? dataInternet.filter(filterBulan) : [];
+    return { l, i };
+  }
+
+  function loadPreview() {
+    const { l, i } = getFilteredData();
+
+    // Stats
+    const lSpj  = l.reduce((s,r)=>s+parseRp(r.spj),0);
+    const iSpj  = i.reduce((s,r)=>s+parseRp(r.spj),0);
+    const lReal = l.reduce((s,r)=>s+parseRp(r.realisasi),0);
+    const iReal = i.reduce((s,r)=>s+parseRp(r.realisasi),0);
+    const lSel  = l.reduce((s,r)=>s+parseRp(r.selisih),0);
+    const iSel  = i.reduce((s,r)=>s+parseRp(r.selisih),0);
+
+    document.getElementById('s_listrikSpj').textContent  = formatRp(lSpj);
+    document.getElementById('s_internetSpj').textContent = formatRp(iSpj);
+    document.getElementById('s_realisasi').textContent   = formatRp(lReal + iReal);
+    document.getElementById('s_selisih').textContent     = formatRp(lSel + iSel);
+
+    const profil = profilData;
+    const header = `
+      <div class="report-header">
+        <p style="font-weight:700;font-size:0.8rem;color:#475569;margin-bottom:4px;">LAPORAN REALISASI PEMBAYARAN LANGGANAN DAYA & JASA</p>
+        <h2>${profil.nama || 'NAMA SEKOLAH'}</h2>
+        <p>NPSN: ${profil.npsn||'—'} &nbsp;|&nbsp; Kepsek: ${profil.kepsek||'—'} &nbsp;|&nbsp; Tahun Anggaran: ${profil.tahun||'2024'}</p>
+        <p style="margin-top:2px;">${profil.alamat||''}</p>
+        <hr style="margin:14px 0;border-color:#e2e8f0;">
+      </div>`;
+
+    let listrikHtml = '', internetHtml = '';
+
+    if (l.length) {
+      listrikHtml = `
+        <div class="report-section-title"><i class="fas fa-bolt"></i> DATA LISTRIK</div>
+        <table class="report-table">
+          <thead><tr>
+            <th>No</th><th>Sekolah</th><th>ID Pelanggan</th><th>Bulan</th><th>Jenis</th>
+            <th>SPJ (Rp)</th><th>Realisasi (Rp)</th><th>Adm (Rp)</th><th>Selisih (Rp)</th>
+          </tr></thead>
+          <tbody>
+            ${l.map(r=>`<tr>
+              <td>${r.no}</td><td>${r.sekolah}</td><td>${r.id_pelanggan}</td>
+              <td>${r.bulan}</td><td>${r.jenis||'-'}</td>
+              <td style="text-align:right;">${formatRp(r.spj)}</td>
+              <td style="text-align:right;">${formatRp(r.realisasi)}</td>
+              <td style="text-align:right;">${formatRp(r.admin)}</td>
+              <td style="text-align:right;font-weight:700;color:${parseRp(r.selisih)>=0?'#059669':'#dc2626'};">${formatRp(r.selisih)}</td>
+            </tr>`).join('')}
+          </tbody>
+          <tfoot><tr>
+            <td colspan="5" style="text-align:right;font-weight:700;">TOTAL</td>
+            <td style="text-align:right;">${formatRp(lSpj)}</td>
+            <td style="text-align:right;">${formatRp(lReal)}</td>
+            <td></td>
+            <td style="text-align:right;">${formatRp(lSel)}</td>
+          </tr></tfoot>
+        </table>`;
+    }
+
+    if (i.length) {
+      const iReal2 = i.reduce((s,r)=>s+parseRp(r.realisasi),0);
+      internetHtml = `
+        <div class="report-section-title" style="margin-top:20px;"><i class="fas fa-wifi"></i> DATA INTERNET</div>
+        <table class="report-table">
+          <thead><tr>
+            <th>No</th><th>Sekolah</th><th>ID Pelanggan</th><th>Bulan</th><th>Provider</th>
+            <th>SPJ (Rp)</th><th>Realisasi (Rp)</th><th>Adm (Rp)</th><th>Selisih (Rp)</th>
+          </tr></thead>
+          <tbody>
+            ${i.map(r=>`<tr>
+              <td>${r.no}</td><td>${r.sekolah}</td><td>${r.id_pelanggan}</td>
+              <td>${r.bulan}</td><td>${r.provider||'—'}</td>
+              <td style="text-align:right;">${formatRp(r.spj)}</td>
+              <td style="text-align:right;">${formatRp(r.realisasi)}</td>
+              <td style="text-align:right;">${formatRp(r.admin)}</td>
+              <td style="text-align:right;font-weight:700;color:${parseRp(r.selisih)>=0?'#059669':'#dc2626'};">${formatRp(r.selisih)}</td>
+            </tr>`).join('')}
+          </tbody>
+          <tfoot><tr>
+            <td colspan="5" style="text-align:right;font-weight:700;">TOTAL</td>
+            <td style="text-align:right;">${formatRp(iSpj)}</td>
+            <td style="text-align:right;">${formatRp(iReal2)}</td>
+            <td></td>
+            <td style="text-align:right;">${formatRp(iSel)}</td>
+          </tr></tfoot>
+        </table>`;
+    }
+
+    const rekap = `
+      <div class="report-section-title" style="margin-top:20px;background:#f0fdf4;border-left-color:#16a34a;">
+        <i class="fas fa-chart-bar" style="color:#16a34a;"></i> REKAPITULASI
+      </div>
+      <table class="report-table" style="max-width:480px;">
+        <thead><tr><th>Uraian</th><th>SPJ (Rp)</th><th>Realisasi (Rp)</th><th>Selisih (Rp)</th></tr></thead>
+        <tbody>
+          <tr><td>Listrik</td><td>${formatRp(lSpj)}</td><td>${formatRp(lReal)}</td><td>${formatRp(lSel)}</td></tr>
+          <tr><td>Internet</td><td>${formatRp(iSpj)}</td><td>${formatRp(iReal)}</td><td>${formatRp(iSel)}</td></tr>
+        </tbody>
+        <tfoot>
+          <tr><td><strong>TOTAL</strong></td><td><strong>${formatRp(lSpj+iSpj)}</strong></td><td><strong>${formatRp(lReal+iReal)}</strong></td><td><strong>${formatRp(lSel+iSel)}</strong></td></tr>
+        </tfoot>
+      </table>
+      <p style="margin-top:32px;font-size:0.78rem;color:var(--slate-500);text-align:right;">
+        Dicetak: ${new Date().toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}
+      </p>`;
+
+    const html = `<div style="padding:28px;">${header}${listrikHtml}${internetHtml}${rekap}</div>`;
+    document.getElementById('reportPreview').innerHTML = html;
+    document.getElementById('previewMeta').textContent = `${l.length} data listrik, ${i.length} data internet`;
+  }
+
+  function exportExcelFull() {
+    if (typeof XLSX === 'undefined') { toast('SheetJS belum dimuat.','error'); return; }
+    const { l, i } = getFilteredData();
+    const wb = XLSX.utils.book_new();
+
+    if (l.length) {
+      const ws = XLSX.utils.json_to_sheet(l.map(r => ({
+        'No':r.no,'Sekolah':r.sekolah,'ID Pelanggan':r.id_pelanggan,'Bulan':r.bulan,
+        'Jenis':r.jenis,'SPJ (Rp)':parseRp(r.spj),'Realisasi (Rp)':parseRp(r.realisasi),
+        'Admin (Rp)':parseRp(r.admin),'Selisih (Rp)':parseRp(r.selisih)
+      })));
+      XLSX.utils.book_append_sheet(wb, ws, 'Listrik');
+    }
+    if (i.length) {
+      const ws = XLSX.utils.json_to_sheet(i.map(r => ({
+        'No':r.no,'Sekolah':r.sekolah,'ID Pelanggan':r.id_pelanggan,'Bulan':r.bulan,
+        'Provider':r.provider||'','SPJ (Rp)':parseRp(r.spj),'Realisasi (Rp)':parseRp(r.realisasi),
+        'Admin (Rp)':parseRp(r.admin),'Selisih (Rp)':parseRp(r.selisih)
+      })));
+      XLSX.utils.book_append_sheet(wb, ws, 'Internet');
+    }
+
+    // Rekap sheet
+    const { l: la, i: ia2 } = getFilteredData();
+    const rekap = [
+      { Uraian: 'Listrik', 'SPJ (Rp)': la.reduce((s,r)=>s+parseRp(r.spj),0), 'Realisasi (Rp)': la.reduce((s,r)=>s+parseRp(r.realisasi),0), 'Selisih (Rp)': la.reduce((s,r)=>s+parseRp(r.selisih),0) },
+      { Uraian: 'Internet', 'SPJ (Rp)': ia2.reduce((s,r)=>s+parseRp(r.spj),0), 'Realisasi (Rp)': ia2.reduce((s,r)=>s+parseRp(r.realisasi),0), 'Selisih (Rp)': ia2.reduce((s,r)=>s+parseRp(r.selisih),0) },
+    ];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rekap), 'Rekap');
+
+    XLSX.writeFile(wb, `laporan_siPelis_${profilData.tahun||'2024'}.xlsx`);
+    toast('File Excel berhasil diunduh!','success');
+  }
+
+  async function exportPdfFull() {
+    document.getElementById('loadingText').textContent = 'Menyiapkan PDF…';
+    document.getElementById('loadingOverlay').classList.add('show');
+    try {
+      const element = document.getElementById('reportPreview');
+      const opt = {
+        margin: [10,10,10,10],
+        filename: `laporan_siPelis_${profilData.tahun||'2024'}.pdf`,
+        image: { type: 'jpeg', quality: 0.95 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+      };
+      await html2pdf().set(opt).from(element).save();
+      toast('PDF berhasil diunduh!','success');
+    } catch(e) { toast('Gagal membuat PDF: ' + e.message,'error'); }
+    finally { document.getElementById('loadingOverlay').classList.remove('show'); }
+  }
+
+  init();
+</script>
+</body>
+</html>

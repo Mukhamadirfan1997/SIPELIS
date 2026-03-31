@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard — SiPeLis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <!-- Content injected by layout.js -->
+    <div class="section-title">Selamat Datang 👋</div>
+    <p class="section-sub">
+      Ringkasan pengeluaran listrik & internet sekolah tahun anggaran
+      <strong id="tahunAnggaran">2026</strong>
+    </p>
+
+    <!-- Stat Cards -->
+    <div class="grid-4 gap-24" id="statGrid">
+      <div class="stat-card">
+        <div>
+          <div class="stat-label">Total Listrik (SPJ)</div>
+          <div class="stat-value" id="statListrikSpj">—</div>
+          <div class="stat-sub">Realisasi sesuai SPJ</div>
+        </div>
+        <div class="stat-icon blue"><i class="fas fa-bolt"></i></div>
+      </div>
+      <div class="stat-card">
+        <div>
+          <div class="stat-label">Total Internet (SPJ)</div>
+          <div class="stat-value" id="statInternetSpj">—</div>
+          <div class="stat-sub">Realisasi sesuai SPJ</div>
+        </div>
+        <div class="stat-icon cyan"><i class="fas fa-wifi"></i></div>
+      </div>
+      <div class="stat-card">
+        <div>
+          <div class="stat-label">Total Pengeluaran</div>
+          <div class="stat-value" id="statTotal">—</div>
+          <div class="stat-sub">Listrik + Internet</div>
+        </div>
+        <div class="stat-icon green"><i class="fas fa-coins"></i></div>
+      </div>
+      <div class="stat-card">
+        <div>
+          <div class="stat-label">Total Selisih</div>
+          <div class="stat-value" id="statSelisih">—</div>
+          <div class="stat-sub">SPJ – Realisasi konfirmasi</div>
+        </div>
+        <div class="stat-icon amber"><i class="fas fa-scale-balanced"></i></div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid-2 gap-20" style="margin-bottom: 24px">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"
+            ><i
+              class="fas fa-chart-bar"
+              style="color: var(--blue-500); margin-right: 8px"
+            ></i
+            >Pengeluaran Bulanan</span
+          >
+          <select
+            id="chartYear"
+            class="form-control"
+            style="width: auto; padding: 6px 10px; font-size: 0.8rem"
+            onchange="renderCharts()"
+          >
+            <option>2024</option>
+            <option>2025</option>
+          </select>
+        </div>
+        <div class="card-body">
+          <canvas id="chartBulanan" height="220"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"
+            ><i
+              class="fas fa-chart-pie"
+              style="color: var(--accent); margin-right: 8px"
+            ></i
+            >Proporsi Biaya</span
+          >
+        </div>
+        <div
+          class="card-body"
+          style="display: flex; align-items: center; justify-content: center"
+        >
+          <canvas
+            id="chartPie"
+            style="max-height: 220px; max-width: 220px"
+          ></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent tables row -->
+    <div class="grid-2">
+      <!-- Recent Listrik -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"
+            ><i
+              class="fas fa-bolt"
+              style="color: #f59e0b; margin-right: 8px"
+            ></i
+            >Data Listrik Terbaru</span
+          >
+          <a href="listrik.html" class="btn btn-sm btn-outline">Lihat Semua</a>
+        </div>
+        <div class="table-wrap">
+          <table id="tableListrikRecent">
+            <thead>
+              <tr>
+                <th>Bulan</th>
+                <th>Jenis</th>
+                <th>SPJ</th>
+                <th>Selisih</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyListrik">
+              <tr>
+                <td
+                  colspan="4"
+                  style="
+                    text-align: center;
+                    padding: 24px;
+                    color: var(--slate-400);
+                  "
+                >
+                  Memuat data…
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Recent Internet -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"
+            ><i
+              class="fas fa-wifi"
+              style="color: var(--accent); margin-right: 8px"
+            ></i
+            >Data Internet Terbaru</span
+          >
+          <a href="internet.html" class="btn btn-sm btn-outline">Lihat Semua</a>
+        </div>
+        <div class="table-wrap">
+          <table id="tableInternetRecent">
+            <thead>
+              <tr>
+                <th>Bulan</th>
+                <th>SPJ</th>
+                <th>Realisasi</th>
+                <th>Selisih</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyInternet">
+              <tr>
+                <td
+                  colspan="4"
+                  style="
+                    text-align: center;
+                    padding: 24px;
+                    color: var(--slate-400);
+                  "
+                >
+                  Memuat data…
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAS URL Config -->
+    <div class="card" style="margin-top: 24px">
+      <div class="card-header">
+        <span class="card-title"
+          ><i
+            class="fas fa-cog"
+            style="color: var(--slate-500); margin-right: 8px"
+          ></i
+          >Konfigurasi Google Apps Script</span
+        >
+      </div>
+      <div class="card-body">
+        <p
+          style="
+            font-size: 0.875rem;
+            color: var(--slate-500);
+            margin-bottom: 14px;
+          "
+        >
+          Masukkan URL Google Apps Script Web App Anda untuk sinkronisasi data
+          ke Google Spreadsheet.
+        </p>
+        <div style="display: flex; gap: 12px">
+          <input
+            type="url"
+            id="gasUrlInput"
+            class="form-control"
+            placeholder="https://script.google.com/macros/s/.../exec"
+            style="flex: 1"
+          />
+          <button class="btn btn-primary" onclick="saveGasUrl()">
+            <i class="fas fa-save"></i> Simpan
+          </button>
+        </div>
+        <p
+          style="font-size: 0.75rem; color: var(--slate-400); margin-top: 10px"
+        >
+          <i class="fas fa-info-circle"></i> Tanpa URL ini, aplikasi berjalan
+          dalam <strong>mode demo</strong> menggunakan data lokal.
+          <a href="#" onclick="showGasTemplate()" style="color: var(--blue-500)"
+            >Lihat template Apps Script</a
+          >
+        </p>
+      </div>
+    </div>
+
+    <!-- GAS Template Modal -->
+    <div
+      id="gasModal"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9000;
+        background: rgba(0, 0, 0, 0.5);
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div
+        style="
+          background: white;
+          border-radius: 16px;
+          max-width: 700px;
+          width: 95%;
+          max-height: 90vh;
+          overflow-y: auto;
+        "
+      >
+        <div
+          style="
+            padding: 24px;
+            border-bottom: 1px solid var(--slate-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <strong>Template Google Apps Script</strong>
+          <button
+            onclick="document.getElementById('gasModal').style.display = 'none'"
+            style="
+              background: none;
+              border: none;
+              font-size: 1.2rem;
+              cursor: pointer;
+            "
+          >
+            ✕
+          </button>
+        </div>
+        <div style="padding: 24px">
+          <p
+            style="
+              font-size: 0.875rem;
+              color: var(--slate-600);
+              margin-bottom: 14px;
+            "
+          >
+            Copy kode berikut ke Google Apps Script, lalu deploy sebagai Web
+            App:
+          </p>
+          <pre
+            id="gasCode"
+            style="
+              background: var(--slate-800);
+              color: #e2e8f0;
+              padding: 18px;
+              border-radius: 12px;
+              font-size: 0.78rem;
+              overflow-x: auto;
+              white-space: pre-wrap;
+            "
+          ></pre>
+          <button
+            class="btn btn-primary"
+            style="margin-top: 14px"
+            onclick="copyGasCode()"
+          >
+            <i class="fas fa-copy"></i> Copy Kode
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script src="layout.js"></script>
+    <script>
+      requireLogin();
+      injectLayout("Dashboard");
+
+      let chartBulanan, chartPie;
+      let dataListrik = [],
+        dataInternet = [];
+
+      async function loadDashboard() {
+        try {
+          [dataListrik, dataInternet] = await Promise.all([
+            gasGet("listrik"),
+            gasGet("internet"),
+          ]);
+          const profil = await gasGet("profil");
+          if (profil && profil.length) {
+            document.getElementById("tahunAnggaran").textContent =
+              profil[0].tahun || "2024";
+          }
+          updateStats();
+          renderCharts();
+          renderRecentTables();
+        } catch (e) {
+          toast("Gagal memuat data: " + e.message, "error");
+        }
+      }
+
+      function updateStats() {
+        const totalLSpj = dataListrik.reduce((s, r) => s + parseRp(r.spj), 0);
+        const totalISpj = dataInternet.reduce((s, r) => s + parseRp(r.spj), 0);
+        const totalSelisih =
+          dataListrik.reduce((s, r) => s + parseRp(r.selisih), 0) +
+          dataInternet.reduce((s, r) => s + parseRp(r.selisih), 0);
+        document.getElementById("statListrikSpj").textContent =
+          formatRp(totalLSpj);
+        document.getElementById("statInternetSpj").textContent =
+          formatRp(totalISpj);
+        document.getElementById("statTotal").textContent = formatRp(
+          totalLSpj + totalISpj,
+        );
+        document.getElementById("statSelisih").textContent =
+          formatRp(totalSelisih);
+      }
+
+      function renderCharts() {
+        const bulanList = BULAN_ORDER.slice(0, 12);
+        const listrikByBulan = bulanList.map((b) => {
+          const rows = dataListrik.filter((r) => r.bulan === b);
+          return rows.reduce((s, r) => s + parseRp(r.spj), 0);
+        });
+        const internetByBulan = bulanList.map((b) => {
+          const rows = dataInternet.filter((r) => r.bulan === b);
+          return rows.reduce((s, r) => s + parseRp(r.spj), 0);
+        });
+
+        if (chartBulanan) chartBulanan.destroy();
+        chartBulanan = new Chart(document.getElementById("chartBulanan"), {
+          type: "bar",
+          data: {
+            labels: bulanList.map((b) => b.slice(0, 3)),
+            datasets: [
+              {
+                label: "Listrik",
+                data: listrikByBulan,
+                backgroundColor: "rgba(37,99,235,0.8)",
+                borderRadius: 6,
+                borderSkipped: false,
+              },
+              {
+                label: "Internet",
+                data: internetByBulan,
+                backgroundColor: "rgba(6,182,212,0.7)",
+                borderRadius: 6,
+                borderSkipped: false,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "top",
+                labels: { font: { family: "Plus Jakarta Sans", size: 12 } },
+              },
+            },
+            scales: {
+              y: {
+                ticks: { callback: (v) => "Rp " + (v / 1000).toFixed(0) + "K" },
+                grid: { color: "#f1f5f9" },
+              },
+              x: { grid: { display: false } },
+            },
+          },
+        });
+
+        const totL = listrikByBulan.reduce((a, b) => a + b, 0);
+        const totI = internetByBulan.reduce((a, b) => a + b, 0);
+        if (chartPie) chartPie.destroy();
+        chartPie = new Chart(document.getElementById("chartPie"), {
+          type: "doughnut",
+          data: {
+            labels: ["Listrik", "Internet"],
+            datasets: [
+              {
+                data: [totL, totI],
+                backgroundColor: [
+                  "rgba(37,99,235,0.85)",
+                  "rgba(6,182,212,0.8)",
+                ],
+                borderWidth: 0,
+                hoverOffset: 6,
+              },
+            ],
+          },
+          options: {
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: { font: { family: "Plus Jakarta Sans" } },
+              },
+            },
+            cutout: "68%",
+          },
+        });
+      }
+
+      function renderRecentTables() {
+        const tL = document.getElementById("tbodyListrik");
+        const last5L = dataListrik.slice(-5).reverse();
+        tL.innerHTML = last5L.length
+          ? last5L
+              .map(
+                (r) => `
+      <tr>
+        <td><span class="badge badge-blue">${r.bulan}</span></td>
+        <td><span class="badge ${r.jenis === "Pascabayar" ? "badge-amber" : "badge-green"}">${r.jenis || "-"}</span></td>
+        <td>${formatRp(r.spj)}</td>
+        <td style="color:${parseRp(r.selisih) > 0 ? "var(--success)" : "var(--danger)"};">${formatRp(r.selisih)}</td>
+      </tr>`,
+              )
+              .join("")
+          : '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--slate-400);">Belum ada data</td></tr>';
+
+        const tI = document.getElementById("tbodyInternet");
+        const last5I = dataInternet.slice(-5).reverse();
+        tI.innerHTML = last5I.length
+          ? last5I
+              .map(
+                (r) => `
+      <tr>
+        <td><span class="badge badge-blue">${r.bulan}</span></td>
+        <td>${formatRp(r.spj)}</td>
+        <td>${formatRp(r.realisasi)}</td>
+        <td style="color:${parseRp(r.selisih) > 0 ? "var(--success)" : "var(--danger)"};">${formatRp(r.selisih)}</td>
+      </tr>`,
+              )
+              .join("")
+          : '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--slate-400);">Belum ada data</td></tr>';
+      }
+
+      function saveGasUrl() {
+        const url = document.getElementById("gasUrlInput").value.trim();
+        if (!url) {
+          toast("Masukkan URL terlebih dahulu", "warning");
+          return;
+        }
+        localStorage.setItem("gasUrl", url);
+        sessionStorage.setItem("gasUrl", url);
+        toast("URL berhasil disimpan. Halaman akan dimuat ulang.", "success");
+        setTimeout(() => location.reload(), 1500);
+      }
+
+      function showGasTemplate() {
+        const code = `// Google Apps Script — SiPeLis
+// Deploy sebagai: Web App > Execute as: Me > Access: Anyone
+const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID';
+
+function doGet(e) {
+  const action = e.parameter.action;
+  const sheet  = e.parameter.sheet;
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  
+  if (action === 'login') {
+    const loginSheet = ss.getSheetByName('users') || ss.insertSheet('users');
+    const data = loginSheet.getDataRange().getValues();
+    const match = data.find(r => r[0]==e.parameter.user && r[1]==e.parameter.pass);
+    return jsonResponse({ success: !!match });
+  }
+  
+  if (action === 'get') {
+    const sh = ss.getSheetByName(sheet);
+    if (!sh) return jsonResponse([]);
+    const rows = sh.getDataRange().getValues();
+    const headers = rows[0];
+    const result = rows.slice(1).map(r => {
+      const obj = {};
+      headers.forEach((h,i) => obj[h] = r[i]);
+      return obj;
+    });
+    return jsonResponse(result);
+  }
+  
+  return jsonResponse({ error: 'Unknown action' });
+}
+
+function doPost(e) {
+  const body = JSON.parse(e.postData.contents);
+  const { sheet, data } = body;
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  let sh = ss.getSheetByName(sheet);
+  if (!sh) sh = ss.insertSheet(sheet);
+  
+  if (sh.getLastRow() === 0) {
+    sh.appendRow(Object.keys(data));
+  }
+  sh.appendRow(Object.values(data));
+  return jsonResponse({ success: true });
+}
+
+function jsonResponse(data) {
+  return ContentService
+    .createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON);
+}`;
+        document.getElementById("gasCode").textContent = code;
+        document.getElementById("gasModal").style.display = "flex";
+      }
+
+      function copyGasCode() {
+        navigator.clipboard.writeText(
+          document.getElementById("gasCode").textContent,
+        );
+        toast("Kode berhasil disalin!", "success");
+      }
+
+      document.getElementById("gasUrlInput").value =
+        localStorage.getItem("gasUrl") || "";
+      loadDashboard();
+    </script>
+  </body>
+</html>

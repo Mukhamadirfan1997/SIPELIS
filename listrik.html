@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Listrik — SiPeLis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+<div class="section-title">⚡ Data Listrik</div>
+<p class="section-sub">Input dan kelola data pembayaran listrik sekolah</p>
+
+<!-- Form Input -->
+<div class="card gap-24">
+  <div class="card-header">
+    <span class="card-title"><i class="fas fa-plus-circle" style="color:var(--blue-500);margin-right:8px;"></i>Tambah Data Listrik</span>
+    <div style="display:flex;gap:8px;">
+      <select id="filterBulan" class="form-control" style="width:auto;padding:6px 10px;font-size:0.8rem;" onchange="filterTable()">
+        <option value="">Semua Bulan</option>
+      </select>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="form-grid form-grid-3">
+      <div class="form-group">
+        <label>Satuan Pendidikan / Sekolah <span style="color:red">*</span></label>
+        <input type="text" id="f_sekolah" class="form-control" placeholder="Nama sekolah..." />
+      </div>
+      <div class="form-group">
+        <label>ID / No. Pelanggan Listrik <span style="color:red">*</span></label>
+        <input type="text" id="f_id_pelanggan" class="form-control" placeholder="Contoh: 531234567890" />
+      </div>
+      <div class="form-group">
+        <label>Bulan <span style="color:red">*</span></label>
+        <select id="f_bulan" class="form-control">
+          <option value="">-- Pilih Bulan --</option>
+          <option>Januari</option><option>Februari</option><option>Maret</option>
+          <option>April</option><option>Mei</option><option>Juni</option>
+          <option>Juli</option><option>Agustus</option><option>September</option>
+          <option>Oktober</option><option>November</option><option>Desember</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Jenis Pembayaran <span style="color:red">*</span></label>
+        <select id="f_jenis" class="form-control">
+          <option value="">-- Pilih --</option>
+          <option>Pascabayar</option>
+          <option>Prabayar</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Realisasi SPJ (Rp) <span style="color:red">*</span></label>
+        <input type="text" id="f_spj" class="form-control" placeholder="0" oninput="hitungSelisih()" />
+      </div>
+      <div class="form-group">
+        <label>Realisasi Konfirmasi Provider (Rp) <span style="color:red">*</span></label>
+        <input type="text" id="f_realisasi" class="form-control" placeholder="0" oninput="hitungSelisih()" />
+      </div>
+      <div class="form-group">
+        <label>Biaya Administrasi (Rp)</label>
+        <input type="text" id="f_admin" class="form-control" placeholder="0 (opsional)" oninput="hitungSelisih()" />
+      </div>
+      <div class="form-group">
+        <label>Selisih (Otomatis)</label>
+        <input type="text" id="f_selisih" class="form-control" placeholder="Auto dihitung" readonly style="background:var(--slate-100);font-weight:700;" />
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="tambahData()"><i class="fas fa-plus"></i> Tambah ke Tabel</button>
+      <button class="btn btn-success" onclick="simpanSemua()"><i class="fas fa-cloud-upload-alt"></i> Simpan ke Spreadsheet</button>
+      <button class="btn btn-outline" onclick="resetForm()"><i class="fas fa-redo"></i> Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- Data Table -->
+<div class="card" style="margin-top:20px;">
+  <div class="table-toolbar">
+    <input type="text" class="search-input" id="searchInput" placeholder="Cari data listrik..." oninput="filterTable()" />
+    <div style="display:flex;gap:8px;flex-shrink:0;">
+      <button class="btn btn-outline btn-sm" onclick="exportExcel()"><i class="fas fa-file-excel" style="color:#16a34a;"></i> Excel</button>
+      <button class="btn btn-outline btn-sm" onclick="exportPdf()"><i class="fas fa-file-pdf" style="color:#dc2626;"></i> PDF</button>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th onclick="sortTable('no')">No ↕</th>
+          <th onclick="sortTable('sekolah')">Sekolah ↕</th>
+          <th onclick="sortTable('id_pelanggan')">ID Pelanggan ↕</th>
+          <th onclick="sortTable('bulan')">Bulan ↕</th>
+          <th onclick="sortTable('jenis')">Jenis ↕</th>
+          <th onclick="sortTable('spj')">SPJ (Rp) ↕</th>
+          <th onclick="sortTable('realisasi')">Realisasi (Rp) ↕</th>
+          <th onclick="sortTable('admin')">Adm (Rp) ↕</th>
+          <th onclick="sortTable('selisih')">Selisih ↕</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="tbodyListrik">
+        <tr><td colspan="10" style="text-align:center;padding:40px;color:var(--slate-400);"><i class="fas fa-spinner fa-spin"></i> Memuat data…</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div id="paginationWrap" style="padding:16px 20px;border-top:1px solid var(--slate-100);"></div>
+</div>
+
+<!-- Summary Row -->
+<div class="card" style="margin-top:16px;">
+  <div class="card-body" style="display:flex;gap:24px;flex-wrap:wrap;">
+    <div><span style="font-size:0.78rem;color:var(--slate-500);display:block;margin-bottom:4px;">Total SPJ</span><strong id="totalSpj" style="color:var(--blue-700);font-size:1.1rem;">Rp 0</strong></div>
+    <div><span style="font-size:0.78rem;color:var(--slate-500);display:block;margin-bottom:4px;">Total Realisasi</span><strong id="totalRealisasi" style="color:var(--success);font-size:1.1rem;">Rp 0</strong></div>
+    <div><span style="font-size:0.78rem;color:var(--slate-500);display:block;margin-bottom:4px;">Total Admin</span><strong id="totalAdmin" style="color:var(--warning);font-size:1.1rem;">Rp 0</strong></div>
+    <div><span style="font-size:0.78rem;color:var(--slate-500);display:block;margin-bottom:4px;">Total Selisih</span><strong id="totalSelisih" style="color:var(--danger);font-size:1.1rem;">Rp 0</strong></div>
+    <div style="margin-left:auto;align-self:center;"><span id="totalRows" style="font-size:0.8rem;color:var(--slate-500);">0 data</span></div>
+  </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loader"></div>
+  <div class="loader-text">Menyimpan data…</div>
+</div>
+
+<script src="app.js"></script>
+<script src="layout.js"></script>
+<script>
+  requireLogin();
+  injectLayout('Data Listrik');
+
+  let allData = [];
+  let pendingData = []; // rows added in form, not yet saved
+  let currentPage = 1;
+  const PER_PAGE = 10;
+  let sortKey = 'no', sortDir = 1;
+  let filterBulanVal = '';
+  let autoNo = 1;
+
+  // Populate filter dropdown
+  const filterSel = document.getElementById('filterBulan');
+  BULAN_ORDER.forEach(b => {
+    const o = document.createElement('option'); o.value = b; o.textContent = b;
+    filterSel.appendChild(o);
+  });
+
+  async function loadData() {
+    try {
+      allData = await gasGet('listrik');
+      allData = allData.map((r,i) => ({ ...r, no: r.no || i+1 }));
+      autoNo = allData.length + 1;
+      filterTable();
+      updateSummary(allData);
+    } catch(e) {
+      toast('Gagal memuat data: ' + e.message, 'error');
+    }
+  }
+
+  function hitungSelisih() {
+    const spj  = parseRp(document.getElementById('f_spj').value);
+    const real = parseRp(document.getElementById('f_realisasi').value);
+    const adm  = parseRp(document.getElementById('f_admin').value);
+    const selisih = spj - real - adm;
+    document.getElementById('f_selisih').value = formatRp(selisih);
+    document.getElementById('f_selisih').style.color = selisih >= 0 ? 'var(--success)' : 'var(--danger)';
+  }
+
+  function tambahData() {
+    const sekolah     = document.getElementById('f_sekolah').value.trim();
+    const id_pelanggan = document.getElementById('f_id_pelanggan').value.trim();
+    const bulan       = document.getElementById('f_bulan').value;
+    const jenis       = document.getElementById('f_jenis').value;
+    const spj         = parseRp(document.getElementById('f_spj').value);
+    const realisasi   = parseRp(document.getElementById('f_realisasi').value);
+    const admin       = parseRp(document.getElementById('f_admin').value);
+
+    if (!sekolah || !id_pelanggan || !bulan || !jenis || !spj || !realisasi) {
+      toast('Harap lengkapi semua field wajib (*)', 'warning');
+      return;
+    }
+
+    const selisih = spj - realisasi - admin;
+    const row = { no: autoNo++, sekolah, id_pelanggan, bulan, jenis, spj, realisasi, admin, selisih, _pending: true };
+    allData.push(row);
+    pendingData.push(row);
+    filterTable();
+    updateSummary(allData);
+    toast('Baris ditambahkan. Klik "Simpan ke Spreadsheet" untuk menyimpan.', 'info');
+    resetForm();
+  }
+
+  async function simpanSemua() {
+    if (!pendingData.length) { toast('Tidak ada data baru untuk disimpan.', 'info'); return; }
+    document.getElementById('loadingOverlay').classList.add('show');
+    try {
+      for (const row of pendingData) {
+        const { _pending, ...data } = row;
+        await gasPost('listrik', data);
+      }
+      // Simpan jumlah SEBELUM reset
+      const saved = pendingData.length;
+      allData = allData.map(r => ({ ...r, _pending: false }));
+      pendingData = [];
+      filterTable();
+      toast(`${saved} data berhasil disimpan ke Spreadsheet!`, 'success');
+    } catch(e) {
+      toast('Gagal menyimpan: ' + e.message, 'error');
+    } finally {
+      document.getElementById('loadingOverlay').classList.remove('show');
+    }
+  }
+
+  async function hapusRow(no) {
+    if (!confirm('Hapus baris ini? Data juga akan dihapus dari Spreadsheet.')) return;
+    const isPending = pendingData.some(r => r.no === no);
+    allData = allData.filter(r => r.no !== no);
+    pendingData = pendingData.filter(r => r.no !== no);
+    filterTable();
+    updateSummary(allData);
+
+    // Hapus dari Spreadsheet jika bukan data pending (sudah tersimpan)
+    if (!isPending) {
+      try {
+        document.getElementById('loadingOverlay').classList.add('show');
+        await gasDelete('listrik', 'no', no);
+        toast('Baris berhasil dihapus dari Spreadsheet.', 'success');
+      } catch(e) {
+        toast('Gagal menghapus dari Spreadsheet: ' + e.message, 'error');
+      } finally {
+        document.getElementById('loadingOverlay').classList.remove('show');
+      }
+    } else {
+      toast('Baris dihapus.', 'warning');
+    }
+  }
+
+  function resetForm() {
+    ['f_sekolah','f_id_pelanggan','f_spj','f_realisasi','f_admin','f_selisih'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('f_bulan').value = '';
+    document.getElementById('f_jenis').value = '';
+  }
+
+  function filterTable() {
+    const q    = (document.getElementById('searchInput').value || '').toLowerCase();
+    filterBulanVal = document.getElementById('filterBulan').value;
+    let data = allData.filter(r => {
+      const matchSearch = !q ||
+        String(r.sekolah).toLowerCase().includes(q) ||
+        String(r.id_pelanggan).toLowerCase().includes(q) ||
+        String(r.bulan).toLowerCase().includes(q);
+      const matchBulan = !filterBulanVal || r.bulan === filterBulanVal;
+      return matchSearch && matchBulan;
+    });
+    data = data.sort((a,b) => {
+      let va = a[sortKey], vb = b[sortKey];
+      if (sortKey === 'bulan') { va = BULAN_ORDER.indexOf(va); vb = BULAN_ORDER.indexOf(vb); }
+      if (typeof va === 'string') return va.localeCompare(vb) * sortDir;
+      return (va - vb) * sortDir;
+    });
+    renderTable(data);
+    updateSummary(data);
+  }
+
+  function sortTable(key) {
+    if (sortKey === key) sortDir *= -1;
+    else { sortKey = key; sortDir = 1; }
+    filterTable();
+  }
+
+  function renderTable(data) {
+    const start = (currentPage - 1) * PER_PAGE;
+    const page  = data.slice(start, start + PER_PAGE);
+    const tbody = document.getElementById('tbodyListrik');
+
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--slate-400);">Belum ada data</td></tr>';
+      document.getElementById('paginationWrap').innerHTML = '';
+      return;
+    }
+
+    tbody.innerHTML = page.map(r => `
+      <tr style="${r._pending ? 'background:rgba(234,179,8,0.06);' : ''}">
+        <td>${r.no}${r._pending ? ' <span class="badge badge-amber" style="font-size:0.65rem;">baru</span>' : ''}</td>
+        <td style="white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis;" title="${r.sekolah}">${r.sekolah}</td>
+        <td><code style="background:var(--slate-100);padding:2px 6px;border-radius:4px;font-size:0.8rem;">${r.id_pelanggan}</code></td>
+        <td><span class="badge badge-blue">${r.bulan}</span></td>
+        <td><span class="badge ${r.jenis==='Pascabayar'?'badge-amber':'badge-green'}">${r.jenis||'-'}</span></td>
+        <td>${formatRp(r.spj)}</td>
+        <td>${formatRp(r.realisasi)}</td>
+        <td>${r.admin ? formatRp(r.admin) : '<span style="color:var(--slate-300)">—</span>'}</td>
+        <td style="font-weight:700;color:${parseRp(r.selisih)>=0?'var(--success)':'var(--danger)'};">${formatRp(r.selisih)}</td>
+        <td>
+          <button class="btn btn-danger btn-sm btn-icon" onclick="hapusRow(${r.no})" title="Hapus">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </td>
+      </tr>`).join('');
+
+    const totalPages = Math.ceil(data.length / PER_PAGE);
+    let pagHtml = totalPages > 1 ? '<div class="pagination">' : '';
+    if (totalPages > 1) {
+      if (currentPage > 1) pagHtml += `<button onclick="goPage(${currentPage-1})">‹</button>`;
+      for (let i=1;i<=totalPages;i++) pagHtml += `<button class="${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+      if (currentPage < totalPages) pagHtml += `<button onclick="goPage(${currentPage+1})">›</button>`;
+      pagHtml += '</div>';
+    }
+    document.getElementById('paginationWrap').innerHTML = pagHtml +
+      `<div style="text-align:center;font-size:0.78rem;color:var(--slate-400);margin-top:8px;">Menampilkan ${start+1}–${Math.min(start+PER_PAGE,data.length)} dari ${data.length} data</div>`;
+    document.getElementById('totalRows').textContent = data.length + ' data';
+  }
+
+  function goPage(p) { currentPage = p; filterTable(); }
+
+  function updateSummary(data) {
+    document.getElementById('totalSpj').textContent      = formatRp(data.reduce((s,r)=>s+parseRp(r.spj),0));
+    document.getElementById('totalRealisasi').textContent = formatRp(data.reduce((s,r)=>s+parseRp(r.realisasi),0));
+    document.getElementById('totalAdmin').textContent    = formatRp(data.reduce((s,r)=>s+parseRp(r.admin),0));
+    document.getElementById('totalSelisih').textContent  = formatRp(data.reduce((s,r)=>s+parseRp(r.selisih),0));
+  }
+
+  function exportExcel() {
+    if (typeof XLSX === 'undefined') {
+      toast('SheetJS belum dimuat. Periksa koneksi internet.','error'); return;
+    }
+    const ws = XLSX.utils.json_to_sheet(allData.map(r => ({
+      'No': r.no, 'Sekolah': r.sekolah, 'ID Pelanggan': r.id_pelanggan,
+      'Bulan': r.bulan, 'Jenis': r.jenis,
+      'SPJ (Rp)': parseRp(r.spj), 'Realisasi (Rp)': parseRp(r.realisasi),
+      'Adm (Rp)': parseRp(r.admin), 'Selisih (Rp)': parseRp(r.selisih)
+    })));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Listrik');
+    XLSX.writeFile(wb, 'data_listrik.xlsx');
+    toast('File Excel berhasil diunduh!','success');
+  }
+
+  function exportPdf() {
+    window.open('laporan.html?type=listrik','_blank');
+  }
+
+  loadData();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</body>
+</html>

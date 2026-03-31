@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profil Sekolah — SiPeLis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+<div class="section-title">🏫 Profil Sekolah</div>
+<p class="section-sub">Kelola informasi data sekolah untuk laporan</p>
+
+<div class="grid-2">
+  <!-- Profile Form -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title"><i class="fas fa-edit" style="color:var(--blue-500);margin-right:8px;"></i>Edit Profil Sekolah</span>
+    </div>
+    <div class="card-body">
+      <div class="form-grid" style="gap:18px;">
+        <div class="form-group">
+          <label>Nama Sekolah <span style="color:red">*</span></label>
+          <input type="text" id="f_nama" class="form-control" placeholder="Contoh: SDN Maju Bersama" />
+        </div>
+        <div class="form-group">
+          <label>NPSN <span style="color:red">*</span></label>
+          <input type="text" id="f_npsn" class="form-control" placeholder="8 digit NPSN" maxlength="8" />
+        </div>
+        <div class="form-group">
+          <label>Alamat Lengkap <span style="color:red">*</span></label>
+          <textarea id="f_alamat" class="form-control" rows="3" placeholder="Jl. Pendidikan No.1, Kecamatan..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Nama Kepala Sekolah <span style="color:red">*</span></label>
+          <input type="text" id="f_kepsek" class="form-control" placeholder="Drs. Ahmad Sudirman, M.Pd" />
+        </div>
+        <div class="form-group">
+          <label>NIP Kepala Sekolah</label>
+          <input type="text" id="f_nip" class="form-control" placeholder="19XXXXXXXXXX" />
+        </div>
+        <div class="form-grid form-grid-2">
+          <div class="form-group">
+            <label>Tahun Anggaran <span style="color:red">*</span></label>
+            <select id="f_tahun" class="form-control">
+              <option>2023</option><option selected>2024</option><option>2025</option><option>2026</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Jenjang</label>
+            <select id="f_jenjang" class="form-control">
+              <option>SD</option><option>SMP</option><option>SMA</option><option>SMK</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid form-grid-2">
+          <div class="form-group">
+            <label>Kabupaten/Kota</label>
+            <input type="text" id="f_kota" class="form-control" placeholder="Bondowoso" />
+          </div>
+          <div class="form-group">
+            <label>Provinsi</label>
+            <input type="text" id="f_provinsi" class="form-control" placeholder="Jawa Timur" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email Sekolah</label>
+          <input type="email" id="f_email" class="form-control" placeholder="sekolah@disdik.go.id" />
+        </div>
+        <div class="form-group">
+          <label>No. Telepon</label>
+          <input type="tel" id="f_telp" class="form-control" placeholder="0812-xxxx-xxxx" />
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button class="btn btn-primary" onclick="simpanProfil()"><i class="fas fa-save"></i> Simpan Profil</button>
+        <button class="btn btn-outline" onclick="loadProfil()"><i class="fas fa-sync"></i> Muat Ulang</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Preview -->
+  <div style="display:flex;flex-direction:column;gap:18px;">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fas fa-id-card" style="color:var(--success);margin-right:8px;"></i>Kartu Sekolah</span>
+      </div>
+      <div class="card-body">
+        <div id="profilCard" style="text-align:center;">
+          <div style="width:72px;height:72px;background:linear-gradient(135deg,var(--blue-700),var(--blue-500));border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px;color:white;">
+            <i class="fas fa-school"></i>
+          </div>
+          <div id="pc_nama" style="font-size:1.1rem;font-weight:800;color:var(--slate-800);">—</div>
+          <div id="pc_npsn" style="font-size:0.8rem;color:var(--slate-500);margin-top:4px;">NPSN: —</div>
+          <div id="pc_jenjang" style="margin-top:8px;"><span class="badge badge-blue">—</span></div>
+          <hr style="margin:16px 0;border-color:var(--slate-100);">
+          <div style="text-align:left;font-size:0.875rem;display:grid;gap:10px;">
+            <div style="display:flex;gap:10px;">
+              <i class="fas fa-map-marker-alt" style="color:var(--blue-400);width:18px;margin-top:2px;"></i>
+              <span id="pc_alamat" style="color:var(--slate-600);">—</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <i class="fas fa-user-tie" style="color:var(--blue-400);width:18px;"></i>
+              <span id="pc_kepsek" style="color:var(--slate-600);">—</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <i class="fas fa-calendar" style="color:var(--blue-400);width:18px;"></i>
+              <span id="pc_tahun" style="color:var(--slate-600);">Tahun Anggaran: —</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <i class="fas fa-envelope" style="color:var(--blue-400);width:18px;"></i>
+              <span id="pc_email" style="color:var(--slate-600);">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAS URL Config shortcut -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title" style="font-size:0.9rem;"><i class="fas fa-link" style="color:var(--accent);margin-right:8px;"></i>URL Spreadsheet</span>
+      </div>
+      <div class="card-body">
+        <p style="font-size:0.8rem;color:var(--slate-500);margin-bottom:12px;">URL Google Apps Script untuk sync data.</p>
+        <input type="url" id="gasUrlInput" class="form-control" style="font-size:0.8rem;" placeholder="https://script.google.com/macros/s/.../exec" />
+        <button class="btn btn-primary btn-sm" style="margin-top:10px;width:100%;" onclick="saveGasUrl()"><i class="fas fa-save"></i> Simpan URL</button>
+      </div>
+    </div>
+
+    <!-- Akun -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title" style="font-size:0.9rem;"><i class="fas fa-key" style="color:var(--warning);margin-right:8px;"></i>Akun Login</span>
+      </div>
+      <div class="card-body">
+        <p style="font-size:0.8rem;color:var(--slate-500);margin-bottom:12px;">Login menggunakan sheet <code>users</code> di Spreadsheet. Tambahkan baris berisi username dan password.</p>
+        <div style="background:var(--slate-800);color:#e2e8f0;padding:14px;border-radius:10px;font-size:0.78rem;font-family:monospace;">
+          <div style="color:#94a3b8;margin-bottom:6px;">// Sheet: users</div>
+          <div>username | password</div>
+          <div>admin    | admin123</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loader"></div>
+  <div class="loader-text">Menyimpan profil…</div>
+</div>
+
+<script src="app.js"></script>
+<script src="layout.js"></script>
+<script>
+  requireLogin();
+  injectLayout('Profil Sekolah');
+
+  document.getElementById('gasUrlInput').value = localStorage.getItem('gasUrl') || '';
+
+  async function loadProfil() {
+    try {
+      const data = await gasGet('profil');
+      if (data && data.length) {
+        // Ambil data terakhir (safety fallback jika ada duplikat)
+        const p = data[data.length - 1];
+        document.getElementById('f_nama').value    = p.nama    || '';
+        document.getElementById('f_npsn').value    = p.npsn    || '';
+        document.getElementById('f_alamat').value  = p.alamat  || '';
+        document.getElementById('f_kepsek').value  = p.kepsek  || '';
+        document.getElementById('f_nip').value     = p.nip     || '';
+        document.getElementById('f_tahun').value   = p.tahun   || '2024';
+        document.getElementById('f_jenjang').value = p.jenjang || 'SD';
+        document.getElementById('f_kota').value    = p.kota    || '';
+        document.getElementById('f_provinsi').value = p.provinsi || '';
+        document.getElementById('f_email').value   = p.email   || '';
+        document.getElementById('f_telp').value    = p.telp    || '';
+        updateCard();
+      }
+    } catch(e) { toast('Gagal memuat profil: ' + e.message, 'error'); }
+  }
+
+  async function simpanProfil() {
+    const nama = document.getElementById('f_nama').value.trim();
+    const npsn = document.getElementById('f_npsn').value.trim();
+    if (!nama || !npsn) { toast('Nama sekolah dan NPSN wajib diisi.', 'warning'); return; }
+
+    document.getElementById('loadingOverlay').classList.add('show');
+    const data = {
+      nama, npsn,
+      alamat:   document.getElementById('f_alamat').value,
+      kepsek:   document.getElementById('f_kepsek').value,
+      nip:      document.getElementById('f_nip').value,
+      tahun:    document.getElementById('f_tahun').value,
+      jenjang:  document.getElementById('f_jenjang').value,
+      kota:     document.getElementById('f_kota').value,
+      provinsi: document.getElementById('f_provinsi').value,
+      email:    document.getElementById('f_email').value,
+      telp:     document.getElementById('f_telp').value,
+    };
+    try {
+      // Gunakan gasUpdate agar data lama diganti, bukan ditambah terus
+      await gasUpdate('profil', data);
+      // Also save to localStorage for local use
+      localStorage.setItem('siPelisProfil', JSON.stringify(data));
+      updateCard();
+      toast('Profil berhasil disimpan!', 'success');
+    } catch(e) { toast('Gagal menyimpan: ' + e.message, 'error'); }
+    finally { document.getElementById('loadingOverlay').classList.remove('show'); }
+  }
+
+  function updateCard() {
+    document.getElementById('pc_nama').textContent  = document.getElementById('f_nama').value || '—';
+    document.getElementById('pc_npsn').textContent  = 'NPSN: ' + (document.getElementById('f_npsn').value || '—');
+    document.getElementById('pc_jenjang').innerHTML = `<span class="badge badge-blue">${document.getElementById('f_jenjang').value}</span>`;
+    document.getElementById('pc_alamat').textContent  = document.getElementById('f_alamat').value || '—';
+    document.getElementById('pc_kepsek').textContent  = document.getElementById('f_kepsek').value || '—';
+    document.getElementById('pc_tahun').textContent   = 'Tahun Anggaran: ' + document.getElementById('f_tahun').value;
+    document.getElementById('pc_email').textContent   = document.getElementById('f_email').value || '—';
+  }
+
+  function saveGasUrl() {
+    const url = document.getElementById('gasUrlInput').value.trim();
+    if (!url) { toast('Masukkan URL terlebih dahulu', 'warning'); return; }
+    localStorage.setItem('gasUrl', url);
+    toast('URL berhasil disimpan!', 'success');
+  }
+
+  // Auto-update card on input
+  ['f_nama','f_npsn','f_jenjang','f_alamat','f_kepsek','f_tahun','f_email'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateCard);
+    document.getElementById(id).addEventListener('change', updateCard);
+  });
+
+  loadProfil();
+</script>
+</body>
+</html>
